@@ -12,6 +12,7 @@ from argparse import ArgumentParser
 from ood_metrics import fpr_at_95_tpr, calc_metrics, plot_roc, plot_pr,plot_barcode
 from sklearn.metrics import roc_auc_score, roc_curve, auc, precision_recall_curve, average_precision_score
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+from methods import msp_anomaly_score, maxlogit_anomaly_score, entropy_anomaly_score
 
 seed = 42
 
@@ -74,8 +75,11 @@ def main():
 
     model = ERFNet(NUM_CLASSES)
 
-    if (not args.cpu):
-        model = torch.nn.DataParallel(model).cuda()
+    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
+    if (args.cpu):
+        device = torch.device('cpu')
+    
+    model = model.to(device)
 
     def load_my_state_dict(model, state_dict):  #custom function to load model when not all dict elements
         own_state = model.state_dict()
@@ -96,11 +100,14 @@ def main():
     
     for path in glob.glob(os.path.expanduser(str(args.input[0]))):
         print(path)
-        images = input_transform((Image.open(path).convert('RGB'))).unsqueeze(0).float().cuda()
-        images = images.permute(0,3,1,2)
+        images = input_transform((Image.open(path).convert('RGB'))).unsqueeze(0).float().to(device)
+        #images = images.permute(0,3,1,2)
         with torch.no_grad():
             result = model(images)
-        anomaly_result = 1.0 - np.max(result.squeeze(0).data.cpu().numpy(), axis=0)            
+            
+        logits_np = result.squeeze(0).data.cpu().numpy()
+        anomaly_result = entropy_anomaly_score(logits_np)
+        
         pathGT = path.replace("images", "labels_masks")                
         if "RoadObsticle21" in pathGT:
            pathGT = pathGT.replace("webp", "png")
