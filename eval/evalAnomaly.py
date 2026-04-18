@@ -59,7 +59,26 @@ def main():
     parser.add_argument('--num-workers', type=int, default=4)
     parser.add_argument('--batch-size', type=int, default=1)
     parser.add_argument('--cpu', action='store_true')
+   
+        #method selector 
+    parser.add_argument(
+        '--method',
+        default='maxlogit',
+        choices=['msp', 'maxlogit', 'entropy'],
+        help='Anomaly scoring method: msp | maxlogit | entropy'
+    )
+    
+    
     args = parser.parse_args()
+    
+    method_map = {
+        'msp':      msp_anomaly_score,
+        'maxlogit': maxlogit_anomaly_score,
+        'entropy':  entropy_anomaly_score,
+    }
+    score_fn = method_map[args.method]
+    print(f"Using anomaly scoring method: {args.method.upper()}")
+    
     anomaly_score_list = []
     ood_gts_list = []
 
@@ -74,11 +93,16 @@ def main():
     print ("Loading weights: " + weightspath)
 
     model = ERFNet(NUM_CLASSES)
-
-    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
-    if (args.cpu):
-        device = torch.device('cpu')
     
+    if args.cpu:
+        device = torch.device('cpu')
+    elif torch.cuda.is_available():
+        device = torch.device('cuda')
+    elif torch.backends.mps.is_available():
+        device = torch.device('mps')
+    else:
+        device = torch.device('cpu')
+
     model = model.to(device)
 
     def load_my_state_dict(model, state_dict):  #custom function to load model when not all dict elements
@@ -106,7 +130,7 @@ def main():
             result = model(images)
             
         logits_np = result.squeeze(0).data.cpu().numpy()
-        anomaly_result = entropy_anomaly_score(logits_np)
+        anomaly_result = score_fn(logits_np)
         
         pathGT = path.replace("images", "labels_masks")                
         if "RoadObsticle21" in pathGT:
@@ -138,7 +162,12 @@ def main():
              ood_gts_list.append(ood_gts)
              anomaly_score_list.append(anomaly_result)
         del result, anomaly_result, ood_gts, mask
-        torch.cuda.empty_cache()
+        
+        
+        if device.type == 'cuda':
+            torch.cuda.empty_cache()
+        elif device.type == 'mps':
+            torch.mps.empty_cache()
 
     file.write( "\n")
 
@@ -163,7 +192,7 @@ def main():
     print(f'AUPRC score: {prc_auc*100.0}')
     print(f'FPR@TPR95: {fpr*100.0}')
 
-    file.write(('    AUPRC score:' + str(prc_auc*100.0) + '   FPR@TPR95:' + str(fpr*100.0) ))
+    file.write((f'    [{args.method.upper()}] AUPRC score:' + str(prc_auc*100.0) + '   FPR@TPR95:' + str(fpr*100.0) ))
     file.close()
 
 if __name__ == '__main__':
