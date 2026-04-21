@@ -48,8 +48,17 @@ def main(args):
     model = ERFNet(NUM_CLASSES)
 
     #model = torch.nn.DataParallel(model)
-    if (not args.cpu):
-        model = torch.nn.DataParallel(model).cuda()
+    if args.cpu:
+        device = torch.device('cpu')
+    elif torch.cuda.is_available():
+        device = torch.device('cuda')
+    elif torch.backends.mps.is_available():
+        device = torch.device('mps')
+    else:
+        device = torch.device('cpu')
+    
+    print(f"Using device: {device}")
+    model = model.to(device)
 
     def load_my_state_dict(model, state_dict):  #custom function to load model when not all dict elements
         own_state = model.state_dict()
@@ -82,15 +91,14 @@ def main(args):
     start = time.time()
 
     for step, (images, labels, filename, filenameGt) in enumerate(loader):
-        if (not args.cpu):
-            images = images.cuda()
-            labels = labels.cuda()
+        images = images.to(device)
+        labels = labels.to(device)
 
         inputs = Variable(images)
         with torch.no_grad():
             outputs = model(inputs)
 
-        iouEvalVal.addBatch(outputs.max(1)[1].unsqueeze(1).data, labels)
+        iouEvalVal.addBatch(outputs.max(1)[1].unsqueeze(1).cpu().data, labels.cpu())
 
         filenameSave = filename[0].split("leftImg8bit/")[1] 
 
