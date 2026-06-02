@@ -887,7 +887,10 @@ class LightningModule(lightning.LightningModule):
             ckpt = {
                 k: v
                 for k, v in ckpt.items()
-                if "class_head" not in k and "class_predictor" not in k
+                if "class_head" not in k
+                and "class_predictor" not in k
+                and "network.encoder.backbone.pos_embed" not in k
+                and "network.q.weight" not in k
             }
         logging.info(f"Loaded {len(ckpt)} keys")
         return ckpt
@@ -898,7 +901,10 @@ class LightningModule(lightning.LightningModule):
                 missing_keys = [
                     key
                     for key in incompatible_keys.missing_keys
-                    if "class_head" not in key and "class_predictor" not in key
+                    if "class_head" not in key
+                    and "class_predictor" not in key
+                    and "network.encoder.backbone.pos_embed" not in key
+                    and "network.q.weight" not in key
                 ]
             else:
                 missing_keys = incompatible_keys.missing_keys
