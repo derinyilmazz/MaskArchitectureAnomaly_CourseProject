@@ -37,7 +37,7 @@ Due to GitHub's file size limits, the EoMT checkpoints must be downloaded separa
    * **Save location:** `eomt/checkpoints/standard_epoch0.ckpt`
 
 3. **Fine-tuned with LogitNorm**
-   * **Download under logitnorm_checkpoin:** [LogitNorm Checkpoint](https://drive.google.com/drive/folders/1t2saVRc4_F54x_y_ErieNyN653riZXCA?usp=sharing)
+   * **Download under logitnorm_checkpoint:** [LogitNorm Checkpoint](https://drive.google.com/drive/folders/1t2saVRc4_F54x_y_ErieNyN653riZXCA?usp=sharing)
    * **Save location:** `eomt/checkpoints/lognorm_epoch0.ckpt`
   
 ## Running Anomaly Evaluation
