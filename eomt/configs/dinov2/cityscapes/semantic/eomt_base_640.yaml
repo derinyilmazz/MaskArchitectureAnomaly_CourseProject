@@ -1,11 +1,10 @@
 trainer:
   max_epochs: 107
   logger:
-    class_path: lightning.pytorch.loggers.wandb.WandbLogger
+    class_path: lightning.pytorch.loggers.CSVLogger
     init_args:
-      resume: allow
-      project: "eomt"
-      name: "cityscapes_semantic_eomt_base_640"
+      save_dir: lognorm_logs
+      name: lognorm_run
 model:
   class_path: training.mask_classification_semantic.MaskClassificationSemantic
   init_args:
