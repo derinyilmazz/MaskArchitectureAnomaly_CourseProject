@@ -18,19 +18,25 @@ Normalization loss to reduce model overconfidence.
 - [trained_models](https://github.com/derinyilmazz/MaskArchitectureAnomaly_CourseProject/blob/main/trained_models) contains the pretrained ERFNet weights for the baseline evaluation.
 - [eomt](https://github.com/derinyilmazz/MaskArchitectureAnomaly_CourseProject/blob/main/eomt) is based on the original EoMT repository. Inside you will find code to train EoMT on Cityscapes, pretrained checkpoints, and our LogitNorm loss modification in `training/mask_classification_loss.py`.
 
+## Setup
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
 ## Running Anomaly Evaluation
 
 **ERFNet:**
 ```bash
 cd eval
-python evalAnomaly.py \
+python3 evalAnomaly.py \
   --input '../Validation_Dataset/RoadAnomaly21/images/*.png' \
   --method maxlogit
 ```
 
 **EoMT-COCO:**
 ```bash
-python eval/evalAnomaly_eomt.py \
+python3 eval/evalAnomaly_eomt.py \
   --model coco \
   --config eomt/configs/dinov2/coco/panoptic/eomt_base_640_2x.yaml \
   --input 'Validation_Dataset/RoadAnomaly21/images/*.png' \
@@ -39,7 +45,7 @@ python eval/evalAnomaly_eomt.py \
 
 **EoMT-Cityscapes pretrained:**
 ```bash
-python eval/evalAnomaly_eomt.py \
+python3 eval/evalAnomaly_eomt.py \
   --model cityscapes \
   --checkpoint /path/to/cityscapes_pretrained.ckpt \
   --input 'Validation_Dataset/RoadAnomaly21/images/*.png' \
@@ -48,7 +54,7 @@ python eval/evalAnomaly_eomt.py \
 
 **EoMT fine-tuned:**
 ```bash
-python eval/evalAnomaly_eomt.py \
+python3 eval/evalAnomaly_eomt.py \
   --model cityscapes \
   --checkpoint /path/to/finetuned.ckpt \
   --input 'Validation_Dataset/RoadAnomaly21/images/*.png' \
@@ -57,7 +63,7 @@ python eval/evalAnomaly_eomt.py \
 
 **EoMT fine-tuned with LogitNorm loss:**
 ```bash
-python eval/evalAnomaly_eomt.py \
+python3 eval/evalAnomaly_eomt.py \
   --model cityscapes \
   --checkpoint eomt/checkpoints/lognorm_epoch0.ckpt \
   --input 'Validation_Dataset/RoadAnomaly21/images/*.png' \
@@ -72,7 +78,7 @@ To reproduce the fine-tuning run:
 
 ```bash
 cd eomt
-WANDB_MODE=disabled python main.py fit \
+WANDB_MODE=disabled python3 main.py fit \
   --config configs/dinov2/cityscapes/semantic/eomt_base_640.yaml \
   --config configs/lognorm_train.yaml \
   --compile_disabled
