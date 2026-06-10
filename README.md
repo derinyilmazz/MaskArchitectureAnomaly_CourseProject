@@ -24,12 +24,27 @@ Normalization loss to reduce model overconfidence.
 python3 -m pip install -r requirements.txt
 ```
 
+## Model Checkpoints
+
+Due to GitHub's file size limits, the EoMT checkpoints must be downloaded separately. Please save all checkpoints into the `eomt/checkpoints/` directory.
+
+1. **Cityscapes Pretrained Baseline**
+   * **Download:** [Instructions in eomt/README.md](eomt/README.md)
+   * **Save location:** `eomt/checkpoints/pytorch_model.bin`
+
+2. **Standard Fine-tuned (No LogitNorm)**
+   * **Download under finetuned_checkpoints:** [Finetuned Checkpoint](https://drive.google.com/drive/folders/1t2saVRc4_F54x_y_ErieNyN653riZXCA?usp=sharing)
+   * **Save location:** `eomt/checkpoints/standard_epoch0.ckpt`
+
+3. **Fine-tuned with LogitNorm**
+   * **Download under logitnorm_checkpoin:** [LogitNorm Checkpoint](https://drive.google.com/drive/folders/1t2saVRc4_F54x_y_ErieNyN653riZXCA?usp=sharing)
+   * **Save location:** `eomt/checkpoints/lognorm_epoch0.ckpt`
+  
 ## Running Anomaly Evaluation
 
 **ERFNet:**
 ```bash
-cd eval
-python3 evalAnomaly.py \
+python3 eval/evalAnomaly.py \
   --input '../Validation_Dataset/RoadAnomaly21/images/*.png' \
   --method maxlogit
 ```
@@ -47,7 +62,7 @@ python3 eval/evalAnomaly_eomt.py \
 ```bash
 python3 eval/evalAnomaly_eomt.py \
   --model cityscapes \
-  --checkpoint /path/to/cityscapes_pretrained.ckpt \
+  --checkpoint eomt/checkpoints/pytorch_model.bin \
   --input 'Validation_Dataset/RoadAnomaly21/images/*.png' \
   --method rba
 ```
@@ -56,7 +71,7 @@ python3 eval/evalAnomaly_eomt.py \
 ```bash
 python3 eval/evalAnomaly_eomt.py \
   --model cityscapes \
-  --checkpoint /path/to/finetuned.ckpt \
+  --checkpoint eomt/checkpoints/standard_epoch0.ckpt \
   --input 'Validation_Dataset/RoadAnomaly21/images/*.png' \
   --method rba
 ```
